@@ -1,6 +1,7 @@
 package certstream
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -12,13 +13,13 @@ const (
 	pingPeriod time.Duration = 15 * time.Second
 )
 
-func CertStreamEventStream(skipHeartbeats bool) (chan jsonq.JsonQuery, chan error) {
+func CertStreamEventStream(url string, headers http.Header, skipHeartbeats bool) (chan jsonq.JsonQuery, chan error) {
 	outputStream := make(chan jsonq.JsonQuery)
 	errStream := make(chan error)
 
 	go func() {
 		for {
-			c, _, err := websocket.DefaultDialer.Dial("wss://certstream.calidog.io", nil)
+			c, _, err := websocket.DefaultDialer.Dial(url, headers)
 
 			if err != nil {
 				errStream <- errors.Wrap(err, "Error connecting to certstream! Sleeping a few seconds and reconnecting... ")
